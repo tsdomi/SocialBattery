@@ -9,7 +9,13 @@
 </head>
 <body class="events-page">
   <header>
-    <div class="logo"><span class="dot"></span>Social Battery</div>
+    <a class="logo" href="index.html" aria-label="Social Battery – kezdőlap">
+  <img src="logo.jpg" alt="Social Battery akkumulátor logó">
+  <span>Social Battery</span>
+    </a>
+    <!-- <div class="logo"><span class="dot"> </span>-->
+      
+  <!-- </div> -->
     <nav class="desktop-nav" aria-label="Fő navigáció">
       <a href="index.html" data-i18n="nav.home">Homepage</a>
       <a href="events.html" data-i18n="nav.events">Események</a>
@@ -55,36 +61,41 @@
         <button class="reset-button" id="resetButton" type="button" data-i18n="sort.resetButton">Alaphelyzet</button>
       </div>
       <form id="filterForm" class="filters-grid">
-        <label> Cím
-          <input id="titleFilter" name="title" type="search" placeholder="Pl. társasjáték est">
-        </label>
-        <label> Helyszín
-          <input id="locationFilter" name="location" type="search" placeholder="Pl. Budapest">
-        </label>
-        <label> Szervező típusa
-          <select id="organizerFilter" name="organizerType">
-            <option value="">Minden szervező</option>
-            <option value="hallgato">Hallgatói közösség</option>
-            <option value="egyetem">Egyetem / intézmény</option>
-            <option value="civil">Civil szervezet</option>
-            <option value="ceg">Cég</option>
-          </select>
-        </label>
+        <label>
+  <span data-i18n="filters.titleLabel">Cím</span>
+  <input
+    id="titleFilter"
+    name="title"
+    type="search"
+    placeholder="Pl. társasjáték est"
+    data-i18n-placeholder="filters.titlePlaceholder"
+  >
+</label>
+        <label>
+  <span data-i18n="filters.locationLabel">Helyszín</span>
+  <input
+    id="locationFilter"
+    name="location"
+    type="search"
+    placeholder="Pl. Budapest"
+    data-i18n-placeholder="filters.locationPlaceholder"
+  >
+</label>
         <label> Téma
           <select id="topicFilter" name="topic">
-            <option value="">Minden téma</option>
-            <option value="szakmai">Szakmai</option>
-            <option value="kozossegi">Közösségi</option>
-            <option value="sport">Sport</option>
-            <option value="kultura">Kultúra</option>
-            <option value="szorakozas">Szórakozás</option>
+            <option value="" data-i18n="filter.topic.all">Minden téma</option>
+            <option value="szakmai" data-i18n="filter.topic.szakmai">Szakmai</option>
+            <option value="kozossegi" data-i18n="filter.topic.kozossegi">Közösségi</option>
+            <option value="sport" data-i18n="filter.topic.sport">Sport</option>
+            <option value="kultura" data-i18n="filter.topic.kultura">Kultúra</option>
+            <option value="szorakozas" data-i18n="filter.topic.szorakozas">Szórakozás</option>
           </select>
         </label>
         <label class="checkbox-field">
           <input id="includePast" name="includePast" type="checkbox">
-          <span>Régebbi, nem aktív események megjelenítése</span>
+          <span data-i18n="filter.checkbox.past">Régebbi, nem aktív események megjelenítése</span>
         </label>
-        <button class="search-button" type="submit">Keresés</button>
+        <button class="search-button" type="submit" data-i18n="filter.button.search">Keresés</button>
       </form>
     </section>
 
@@ -92,8 +103,8 @@
       <div id="eventsGrid" class="events-grid"></div>
       <div id="emptyState" class="empty-state" hidden>
         <span>🔎</span>
-        <h2>Nem találtunk eseményt</h2>
-        <p>Próbálj meg más szűrőket használni, vagy jelenítsd meg a régebbi eseményeket is.</p>
+        <h2 data-i18n="error.notfound">Nem találtunk eseményt</h2>
+        <p data-i18n="error.notfoundMessage">Próbálj meg más szűrőket használni, vagy jelenítsd meg a régebbi eseményeket is.</p>
       </div>
       <div class="pagination" id="pagination"></div>
     </section>
@@ -108,10 +119,61 @@
     let usingLocalData = false;
 
     const sampleEvents = [
-      { id: 1, title: 'Társasjáték est', image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=900&q=80', registered: 24, capacity: 40, location: 'Székesfehérvár', organizerType: 'hallgato', organizerLabel: 'Hallgatói közösség', topic: 'szorakozas', topicLabel: 'Szórakozás', start: '2026-12-18T18:00:00+01:00', description: 'Könnyed társasjáték-est új és régi játékokkal.' },
-      { id: 2, title: 'Robotika workshop', image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80', registered: 18, capacity: 25, location: 'Budapest', organizerType: 'egyetem', organizerLabel: 'Egyetem / intézmény', topic: 'szakmai', topicLabel: 'Szakmai', start: '2026-11-07T10:00:00+01:00', description: 'Gyakorlati bevezetés robotkarok és szenzorok használatába.' },
-      { id: 3, title: 'Közösségi futás', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=900&q=80', registered: 31, capacity: 50, location: 'Velence', organizerType: 'civil', organizerLabel: 'Civil szervezet', topic: 'sport', topicLabel: 'Sport', start: '2026-10-03T09:00:00+02:00', description: 'Közös, kezdőbarát futás a tó körül.' }
-    ];
+  { 
+    id: 1, 
+    title: 'Társasjáték est', 
+    titleEn: 'Board Game Night',
+    image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=900&q=80', 
+    registered: 24, 
+    capacity: 40, 
+    location: 'Székesfehérvár', 
+    organizerType: 'hallgato', 
+    organizerLabel: 'Hallgatói közösség',
+    organizerLabelEn: 'Student Community',
+    topic: 'szorakozas', 
+    topicLabel: 'Szórakozás',
+    topicLabelEn: 'Entertainment',
+    start: '2026-12-18T18:00:00+01:00', 
+    description: 'Könnyed társasjáték-est új és régi játékokkal.',
+    descriptionEn: 'A casual board game night with new and classic games.'
+  },
+  { 
+    id: 2, 
+    title: 'Robotika workshop', 
+    titleEn: 'Robotics Workshop',
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80', 
+    registered: 18, 
+    capacity: 25, 
+    location: 'Budapest', 
+    organizerType: 'egyetem', 
+    organizerLabel: 'Egyetem / intézmény',
+    organizerLabelEn: 'University / Institution',
+    topic: 'szakmai', 
+    topicLabel: 'Szakmai',
+    topicLabelEn: 'Professional',
+    start: '2026-11-07T10:00:00+01:00', 
+    description: 'Gyakorlati bevezetés robotkarok és szenzorok használatába.',
+    descriptionEn: 'A practical introduction to using robotic arms and sensors.'
+  },
+  { 
+    id: 3, 
+    title: 'Közösségi futás', 
+    titleEn: 'Community Run',
+    image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=900&q=80', 
+    registered: 31, 
+    capacity: 50, 
+    location: 'Velence', 
+    organizerType: 'civil', 
+    organizerLabel: 'Civil szervezet',
+    organizerLabelEn: 'Non-profit Organization',
+    topic: 'sport', 
+    topicLabel: 'Sport',
+    topicLabelEn: 'Sports',
+    start: '2026-10-03T09:00:00+02:00', 
+    description: 'Közös, kezdőbarát futás a tó körül.',
+    descriptionEn: 'A beginner-friendly group run around the lake.'
+  }
+];
 
     const $ = selector => document.querySelector(selector);
     const filterForm = $('#filterForm');
@@ -128,7 +190,28 @@
     "hero.subtitle":"Keress közösségi programokat, és csatlakozz azokhoz, akik hasonló dolgok iránt érdeklődnek",
     "sort.title":"Események keresése",
     "sort.resultInfo":"Aktív események betöltése…",
-    "sort.resetButton":"Alaphelyzet"
+    "sort.resetButton":"Alaphelyzet",
+    "filters.titleLabel": "Cím",
+    "filters.titlePlaceholder": "Pl. társasjáték est",
+    "filters.locationLabel": "Helyszín",
+    "filters.locationPlaceholder": "Pl. Budapest",
+    // Téma filter
+    "filter.topic.all": "Minden téma",
+    "filter.topic.szakmai": "Szakmai",
+    "filter.topic.kozossegi": "Közösségi",
+    "filter.topic.sport": "Sport",
+    "filter.topic.kultura": "Kultúra",
+    "filter.topic.szorakozas": "Szórakozás",
+
+    //Error
+    "error.notfound":"Nem találtunk eseményt",
+    "error.notfoundMessage":"Próbálj meg más szűrőket használni, vagy jelenítsd meg a régebbi eseményeket is.",
+    
+    // Checkbox
+    "filter.checkbox.past": "Régebbi, nem aktív események megjelenítése",
+    
+    // Gombok
+    "filter.button.search": "Keresés",
   },
   en: {
     "nav.home": "Homepage",
@@ -141,7 +224,28 @@
     "hero.subtitle":"Look for community events and join people who share similar interests.",
     "sort.title":"Search for events",
     "sort.resultInfo":"Loading active events…",
-    "sort.resetButton":"Reset"
+    "sort.resetButton":"Reset",
+    "filters.titleLabel": "Title",
+    "filters.titlePlaceholder": "E.g. board game night",
+    "filters.locationLabel": "Location",
+    "filters.locationPlaceholder": "E.g. Budapest",
+    // Topic filter
+    "filter.topic.all": "All topics",
+    "filter.topic.szakmai": "Professional",
+    "filter.topic.kozossegi": "Community",
+    "filter.topic.sport": "Sports",
+    "filter.topic.kultura": "Culture",
+    "filter.topic.szorakozas": "Entertainment",
+    //Error
+    "error.notfound": "No events found",
+    "error.notfoundMessage": "Try using different filters, or show past events as well.",
+
+    // Checkbox
+    "filter.checkbox.past": "Show past, inactive events",
+    
+    // Buttons
+    "filter.button.search": "Search",
+    "filter.button.reset": "Reset"
   }
 };
 
@@ -157,6 +261,15 @@
     }
   });
 
+  //Placehorder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (translations[lang] && translations[lang][key]) {
+      el.setAttribute('placeholder', translations[lang][key]);
+    }
+  });
+
+
   // 3) Gombok akt&iacute;v &aacute;llapot&aacute;nak friss&iacute;t&eacute;se
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === lang);
@@ -164,6 +277,8 @@
 
   // 4) Elment&eacute;s localStorage-ba (kö±±½vetkező l&aacute;togat&aacute;skor is megmaradjon)
   localStorage.setItem('preferredLang', lang);
+
+  renderEvents();
   }
 
   /* Inicializ&aacute;l&aacute;s: localStorage vagy böng&eacute;sző alapj&aacute;n */
@@ -221,22 +336,26 @@
 
     function renderEvents() {
       const events = getFilteredEvents();
+      const lang = localStorage.getItem('preferredLang') || 'hu';
+      const isEn = lang === 'en';
+
       const totalPages = Math.max(1, Math.ceil(events.length / PAGE_SIZE));
       currentPage = Math.min(currentPage, totalPages);
       const visibleEvents = events.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
       $('#eventsGrid').innerHTML = visibleEvents.map(event => `
         <article class="event-card">
           <div class="event-image-wrap">
             <img class="event-image" src="${escapeHtml(event.image)}" alt="${escapeHtml(event.title)}" loading="lazy">
-            <span class="event-topic">${escapeHtml(event.topicLabel || event.topic)}</span>
+            <span class="event-topic">${escapeHtml(isEn ? event.topicLabelEn : event.topicLabel || event.topic)}</span>
           </div>
           <div class="event-card-body">
             <p class="event-date">${escapeHtml(formatDate(event.start))}</p>
-            <h2>${escapeHtml(event.title)}</h2>
-            <div class="event-meta"><span>👥</span><span>${event.registered} jelentkező${event.capacity ? ` / ${event.capacity} hely` : ''}</span></div>
+            <h2>${escapeHtml(isEn ? event.titleEn : event.title)}</h2>
+            <div class="event-meta"><span>👥</span><span>${event.registered} ${isEn?'registered':'jelentkező'}${event.capacity ? ` / ${event.capacity} ${isEn?'capacity':'hely'}` : ''}</span></div>
             <div class="event-meta"><span>📍</span><span>${escapeHtml(event.location)}</span></div>
-            <p class="event-organizer">${escapeHtml(event.organizerLabel || event.organizerType)}</p>
-            <a class="event-more" href="event-details.html?id=${encodeURIComponent(event.id)}">Tovább <span>→</span></a>
+            <p class="event-organizer">${escapeHtml(isEn ? event.organizerLabelEn : event.organizerLabel || event.organizerType)}</p>
+            <a class="event-more" href="event-details.html?id=${encodeURIComponent(event.id)}">${isEn ? 'More' : 'Tovább'} <span>→</span></a>
           </div>
         </article>
       `).join('');
