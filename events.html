@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Események | Social Battery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stylesheetEvent.css">
+</head>
+<body class="events-page">
+  <header>
+    <div class="logo"><span class="dot"></span>Social Battery</div>
+    <nav class="desktop-nav" aria-label="Fő navigáció">
+      <a href="index.html" data-i18n="nav.home">Homepage</a>
+      <a href="events.html" data-i18n="nav.events">Események</a>
+      <a href="#profile" data-i18n="nav.profile">Profil</a>
+      <a href="#news" data-i18n="nav.news">Hallgatói hírek</a>
+      <a href="#signup" class="cta" data-i18n="nav.signup">Jelentkezés</a>
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="hu">HU</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </nav>
+    <button class="burger" id="burger" aria-label="Menü megnyitása" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobil navigáció">
+    <a href="index.html" data-i18n="nav.home">Homepage</a>
+    <a href="events.html" data-i18n="nav.events">Események</a>
+    <a href="#profile" data-i18n="nav.profile">Profil</a>
+    <a href="#news" data-i18n="nav.news">Hallgatói hírek</a>
+    <a href="#signup" class="cta" data-i18n="nav.signup">Jelentkezés</a>
+    <div class="lang-switch">
+        <button class="lang-btn" data-lang="hu">HU</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+  </nav>
+
+  <main class="events-main">
+    <section class="events-heading">
+      <span class="hero-badge" data-i18n="hero.badge">✨ Találd meg a következő élményed</span>
+      <h1 class="events-title" data-i18n="hero.title">Események</h1>
+      <p data-i18n="hero.subtitle">Keress közösségi programokat, és csatlakozz azokhoz, akik hasonló dolgok iránt érdeklődnek.</p>
+    </section>
+
+    <section class="filters-panel" aria-labelledby="filter-title">
+      <div class="filter-header">
+        <div>
+          <h2 id="filter-title" data-i18n="sort.title">Események keresése</h2>
+          <span id="resultInfo" class="result-info" data-i18n="sort.resultInfo">Aktív események betöltése…</span>
+        </div>
+        <button class="reset-button" id="resetButton" type="button" data-i18n="sort.resetButton">Alaphelyzet</button>
+      </div>
+      <form id="filterForm" class="filters-grid">
+        <label> Cím
+          <input id="titleFilter" name="title" type="search" placeholder="Pl. társasjáték est">
+        </label>
+        <label> Helyszín
+          <input id="locationFilter" name="location" type="search" placeholder="Pl. Budapest">
+        </label>
+        <label> Szervező típusa
+          <select id="organizerFilter" name="organizerType">
+            <option value="">Minden szervező</option>
+            <option value="hallgato">Hallgatói közösség</option>
+            <option value="egyetem">Egyetem / intézmény</option>
+            <option value="civil">Civil szervezet</option>
+            <option value="ceg">Cég</option>
+          </select>
+        </label>
+        <label> Téma
+          <select id="topicFilter" name="topic">
+            <option value="">Minden téma</option>
+            <option value="szakmai">Szakmai</option>
+            <option value="kozossegi">Közösségi</option>
+            <option value="sport">Sport</option>
+            <option value="kultura">Kultúra</option>
+            <option value="szorakozas">Szórakozás</option>
+          </select>
+        </label>
+        <label class="checkbox-field">
+          <input id="includePast" name="includePast" type="checkbox">
+          <span>Régebbi, nem aktív események megjelenítése</span>
+        </label>
+        <button class="search-button" type="submit">Keresés</button>
+      </form>
+    </section>
+
+    <section aria-live="polite">
+      <div id="eventsGrid" class="events-grid"></div>
+      <div id="emptyState" class="empty-state" hidden>
+        <span>🔎</span>
+        <h2>Nem találtunk eseményt</h2>
+        <p>Próbálj meg más szűrőket használni, vagy jelenítsd meg a régebbi eseményeket is.</p>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </section>
+  </main>
+
+  <script>
+    const EVENTS_JSON_URL = 'events.json';
+    const EVENTS_API_URL = '/api/events';
+    const PAGE_SIZE = 10;
+    let allEvents = [];
+    let currentPage = 1;
+    let usingLocalData = false;
+
+    const sampleEvents = [
+      { id: 1, title: 'Társasjáték est', image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=900&q=80', registered: 24, capacity: 40, location: 'Székesfehérvár', organizerType: 'hallgato', organizerLabel: 'Hallgatói közösség', topic: 'szorakozas', topicLabel: 'Szórakozás', start: '2026-12-18T18:00:00+01:00', description: 'Könnyed társasjáték-est új és régi játékokkal.' },
+      { id: 2, title: 'Robotika workshop', image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80', registered: 18, capacity: 25, location: 'Budapest', organizerType: 'egyetem', organizerLabel: 'Egyetem / intézmény', topic: 'szakmai', topicLabel: 'Szakmai', start: '2026-11-07T10:00:00+01:00', description: 'Gyakorlati bevezetés robotkarok és szenzorok használatába.' },
+      { id: 3, title: 'Közösségi futás', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=900&q=80', registered: 31, capacity: 50, location: 'Velence', organizerType: 'civil', organizerLabel: 'Civil szervezet', topic: 'sport', topicLabel: 'Sport', start: '2026-10-03T09:00:00+02:00', description: 'Közös, kezdőbarát futás a tó körül.' }
+    ];
+
+    const $ = selector => document.querySelector(selector);
+    const filterForm = $('#filterForm');
+
+    const translations = {
+  hu: {
+    "nav.home": "Főoldal",
+    "nav.events": "Esem&eacute;nyek",
+    "nav.profile": "Profil",
+    "nav.news": "Hallgat&oacute;i h&iacute;rek",
+    "nav.signup": "Jelentkez&eacute;s",
+    "hero.badge":"✨ Találd meg a következő élményed",
+    "hero.title":"Események",
+    "hero.subtitle":"Keress közösségi programokat, és csatlakozz azokhoz, akik hasonló dolgok iránt érdeklődnek",
+    "sort.title":"Események keresése",
+    "sort.resultInfo":"Aktív események betöltése…",
+    "sort.resetButton":"Alaphelyzet"
+  },
+  en: {
+    "nav.home": "Homepage",
+    "nav.events": "Events",
+    "nav.profile": "Profile",
+    "nav.news": "Student News",
+    "nav.signup": "Sign Up",
+    "hero.badge":"✨ Find your next experience",
+    "hero.title":"Events",
+    "hero.subtitle":"Look for community events and join people who share similar interests.",
+    "sort.title":"Search for events",
+    "sort.resultInfo":"Loading active events…",
+    "sort.resetButton":"Reset"
+  }
+};
+
+    function setLanguage(lang) {
+  // 1) HTML lang attrib&uacute;tum friss&iacute;t&eacute;se
+  document.documentElement.lang = lang;
+
+  // 2) Összes [data-i18n] elem szö±±½veg&eacute;nek cser&eacute;je
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang] && translations[lang][key]) {
+      el.innerHTML = translations[lang][key]; // innerHTML, hogy a &eacute; stb. mű÷±½·kö±½·djen
+    }
+  });
+
+  // 3) Gombok akt&iacute;v &aacute;llapot&aacute;nak friss&iacute;t&eacute;se
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  // 4) Elment&eacute;s localStorage-ba (kö±±½vetkező l&aacute;togat&aacute;skor is megmaradjon)
+  localStorage.setItem('preferredLang', lang);
+  }
+
+  /* Inicializ&aacute;l&aacute;s: localStorage vagy böng&eacute;sző alapj&aacute;n */
+  function initLanguage() {
+    const saved = localStorage.getItem('preferredLang');
+    const browserLang = navigator.language.split('-')[0]; // pl. "hu" vagy "en"
+    const defaultLang = ['hu','en'].includes(saved) ? saved
+      : ['hu','en'].includes(browserLang) ? browserLang
+      : 'hu';
+    setLanguage(defaultLang);
+  }
+
+  /* Esem&eacute;nykezelő÷±½±k a gombokhoz */
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+  });
+
+  // Ind&iacute;t&aacute;s
+  initLanguage();
+
+    function escapeHtml(value = '') {
+      return String(value).replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+    }
+
+    function isActive(event) {
+      return new Date(event.start).getTime() >= Date.now();
+    }
+
+    function getFilters() {
+      const data = new FormData(filterForm);
+      return {
+        title: data.get('title')?.trim() || '',
+        location: data.get('location')?.trim() || '',
+        organizerType: data.get('organizerType') || '',
+        topic: data.get('topic') || '',
+        includePast: data.get('includePast') === 'on'
+      };
+    }
+
+    function getFilteredEvents() {
+      const filters = getFilters();
+      return allEvents.filter(event => {
+        const activeMatch = filters.includePast || isActive(event);
+        const titleMatch = !filters.title || event.title.toLowerCase().includes(filters.title.toLowerCase());
+        const locationMatch = !filters.location || event.location.toLowerCase().includes(filters.location.toLowerCase());
+        const organizerMatch = !filters.organizerType || event.organizerType === filters.organizerType;
+        const topicMatch = !filters.topic || event.topic === filters.topic;
+        return activeMatch && titleMatch && locationMatch && organizerMatch && topicMatch;
+      }).sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+
+    function formatDate(dateString) {
+      return new Intl.DateTimeFormat('hu-HU', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(dateString));
+    }
+
+    function renderEvents() {
+      const events = getFilteredEvents();
+      const totalPages = Math.max(1, Math.ceil(events.length / PAGE_SIZE));
+      currentPage = Math.min(currentPage, totalPages);
+      const visibleEvents = events.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+      $('#eventsGrid').innerHTML = visibleEvents.map(event => `
+        <article class="event-card">
+          <div class="event-image-wrap">
+            <img class="event-image" src="${escapeHtml(event.image)}" alt="${escapeHtml(event.title)}" loading="lazy">
+            <span class="event-topic">${escapeHtml(event.topicLabel || event.topic)}</span>
+          </div>
+          <div class="event-card-body">
+            <p class="event-date">${escapeHtml(formatDate(event.start))}</p>
+            <h2>${escapeHtml(event.title)}</h2>
+            <div class="event-meta"><span>👥</span><span>${event.registered} jelentkező${event.capacity ? ` / ${event.capacity} hely` : ''}</span></div>
+            <div class="event-meta"><span>📍</span><span>${escapeHtml(event.location)}</span></div>
+            <p class="event-organizer">${escapeHtml(event.organizerLabel || event.organizerType)}</p>
+            <a class="event-more" href="event-details.html?id=${encodeURIComponent(event.id)}">Tovább <span>→</span></a>
+          </div>
+        </article>
+      `).join('');
+      $('#emptyState').hidden = visibleEvents.length !== 0;
+      $('#resultInfo').textContent = `${events.length} ${events.length === 1 ? 'esemény' : 'esemény'} található${usingLocalData ? ' (mintaadatok)' : ''}`;
+      renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+      const pagination = $('#pagination');
+      if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+      pagination.innerHTML = `<button type="button" class="page-button" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>← Előző</button><span> ${currentPage} / ${totalPages} </span><button type="button" class="page-button" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>Következő →</button>`;
+      pagination.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => { currentPage = Number(button.dataset.page); renderEvents(); window.scrollTo({ top: 0, behavior: 'smooth' }); }));
+    }
+
+    async function loadEvents() {
+      try {
+        const response = await fetch(EVENTS_JSON_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error('A JSON fájl nem tölthető be.');
+        allEvents = await response.json();
+      } catch (error) {
+        usingLocalData = true;
+        allEvents = sampleEvents;
+        console.warn(error.message, 'A felület mintaadatokkal jelenik meg.');
+      }
+      renderEvents();
+    }
+
+    async function searchOnServer() {
+      const params = new URLSearchParams({ ...getFilters(), page: currentPage, pageSize: PAGE_SIZE });
+      try {
+        const response = await fetch(`${EVENTS_API_URL}?${params}`);
+        if (!response.ok) throw new Error('A szerveres keresés nem érhető el.');
+        allEvents = await response.json();
+        usingLocalData = false;
+        renderEvents();
+      } catch (error) {
+        console.warn(error.message, 'A keresés kliensoldali adatokkal folytatódik.');
+        renderEvents();
+      }
+    }
+
+    filterForm.addEventListener('submit', event => { event.preventDefault(); currentPage = 1; searchOnServer(); });
+    $('#resetButton').addEventListener('click', () => { filterForm.reset(); currentPage = 1; renderEvents(); });
+
+    const burger = $('#burger');
+    const mobileNav = $('#mobileNav');
+    const overlay = $('#overlay');
+    function toggleMenu() {
+      const open = mobileNav.classList.toggle('open');
+      burger.classList.toggle('active', open);
+      overlay.classList.toggle('show', open);
+      burger.setAttribute('aria-expanded', open);
+    }
+    burger.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.mobile-nav a').forEach(link => link.addEventListener('click', () => { if (mobileNav.classList.contains('open')) toggleMenu(); }));
+
+    loadEvents();
+
+    
+  </script>
+</body>
+</html>
