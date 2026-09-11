@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Battery</title>
+<!--<link rel="preconnect" href="https://fonts.googleapis.com">-->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="stylesheet.css">
+
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="dot"></span>Social Battery</div>
+
+  <nav class="desktop-nav">
+    <a href="social_battery.html" data-i18n="nav.home">Homepage</a>
+    <a href="events.html" data-i18n="nav.events">Események</a>
+    <a href="#profile" data-i18n="nav.profile">Profil</a>
+    <a href="#news" data-i18n="nav.news">Hallgatói hírek</a>
+    <a href="#signup" class="cta" data-i18n="nav.signup">Jelentkezés</a>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="hu">HU</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+  </nav>
+
+  <div class="burger" id="burger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<nav class="mobile-nav" id="mobileNav">
+  <a href="social_battery.html" data-i18n="nav.home">Homepage</a>
+    <a href="events.html" data-i18n="nav.events">Események</a>
+    <a href="#profile" data-i18n="nav.profile">Profil</a>
+    <a href="#news" data-i18n="nav.news">Hallgatói hírek</a>
+    <a href="#signup" class="cta" data-i18n="nav.signup">Jelentkezés</a>
+  <div class="lang-switch">
+      <button class="lang-btn" data-lang="hu">HU</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+  </div>
+</nav>
+
+<main>
+  <span class="hero-badge" data-i18n="hero.badge">✨ Csatlakozz a közösséghez</span>
+  <h1 class="hero-title" data-i18n="hero.title">Social Battery</h1>
+  <p class="hero-sub" data-i18n="hero.subtitle">A Social Battery segít a Z generációnak abban, hogy az online kapcsolatokat tartalmas, valódi élményekké alakítsák, amelyek révén kapcsolódhatnak egymáshoz, jól érezhetik magukat és együtt fejlődhetnek.</p>
+  <div class="hero-actions">
+    <a href="#signup" class="btn-primary" data-i18n="cta.primary">Csatlakozom most</a>
+    <a href="events.html" class="btn-secondary" data-i18n="cta.secondary">Események megtekintése</a>
+  </div>
+</main>
+
+<script>
+  const burger = document.getElementById('burger');
+  const mobileNav = document.getElementById('mobileNav');
+  const overlay = document.getElementById('overlay');
+
+  function toggleMenu() {
+    burger.classList.toggle('active');
+    mobileNav.classList.toggle('open');
+    overlay.classList.toggle('show');
+  }
+
+  burger.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+
+  document.querySelectorAll('.mobile-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (mobileNav.classList.contains('open')) toggleMenu();
+    });
+  });
+
+  const translations = {
+  hu: {
+    "nav.home": "Főoldal",
+    "nav.events": "Esem&eacute;nyek",
+    "nav.profile": "Profil",
+    "nav.news": "Hallgat&oacute;i h&iacute;rek",
+    "nav.signup": "Jelentkez&eacute;s",
+    "hero.badge": "✨ Csatlakozz a közöss&eacute;ghez",
+    "hero.title": "Social Battery",
+    "hero.subtitle": "A Social Battery seg&iacute;t a Z gener&aacute;ci&oacute;nak abban, hogy az online kapcsolatokat tartalmas, val&oacute;di &eacute;lm&eacute;nyekk&eacute; alak&iacute;ts&aacute;k, amelyek r&eacute;v&eacute;n kapcsol&oacute;dhatnak egym&aacute;shoz, j&oacute;l &eacute;rezhetik magukat és egy&uuml;tt fejlődhetnek.",
+    "cta.primary": "Csatlakozom most",
+    "cta.secondary": "Esem&eacute;nyek megtekint&eacute;se"
+  },
+  en: {
+    "nav.home": "Homepage",
+    "nav.events": "Events",
+    "nav.profile": "Profile",
+    "nav.news": "Student News",
+    "nav.signup": "Sign Up",
+    "hero.badge": "✨ Join the Community",
+    "hero.title": "Social Battery",
+    "hero.subtitle": "Social Battery helps Gen Z turn online connections into meaningful real-life experiences where they can connect, have fun and grow together.",
+    "cta.primary": "Join Now",
+    "cta.secondary": "Browse Events"
+  }
+};
+function setLanguage(lang) {
+  // 1) HTML lang attrib&uacute;tum friss&iacute;t&eacute;se
+  document.documentElement.lang = lang;
+
+  // 2) Összes [data-i18n] elem szö±±½veg&eacute;nek cser&eacute;je
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang] && translations[lang][key]) {
+      el.innerHTML = translations[lang][key]; // innerHTML, hogy a &eacute; stb. mű÷±½·kö±½·djen
+    }
+  });
+
+  // 3) Gombok akt&iacute;v &aacute;llapot&aacute;nak friss&iacute;t&eacute;se
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  // 4) Elment&eacute;s localStorage-ba (kö±±½vetkező l&aacute;togat&aacute;skor is megmaradjon)
+  localStorage.setItem('preferredLang', lang);
+}
+
+/* Inicializ&aacute;l&aacute;s: localStorage vagy böng&eacute;sző alapj&aacute;n */
+function initLanguage() {
+  const saved = localStorage.getItem('preferredLang');
+  const browserLang = navigator.language.split('-')[0]; // pl. "hu" vagy "en"
+  const defaultLang = ['hu','en'].includes(saved) ? saved
+    : ['hu','en'].includes(browserLang) ? browserLang
+    : 'hu';
+  setLanguage(defaultLang);
+}
+
+/* Esem&eacute;nykezelő÷±½±k a gombokhoz */
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+});
+
+// Ind&iacute;t&aacute;s
+initLanguage();
+</script>
+
+</body>
+</html>
